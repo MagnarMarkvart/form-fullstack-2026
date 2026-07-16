@@ -1,0 +1,24 @@
+.sector-tree-invisible {
+  display: none;
+}
+
+.mat-tree-node {
+  display: flex;
+  align-items: center;
+  min-height: 2.5rem;
+}
+
+.sector-tree-parent {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Indent each nested level so hierarchy is visible */
+:host ::ng-deep .mat-nested-tree-node div[role='group'] {
+  padding-left: 1.5rem;
+}
+
+:host ::ng-deep .mat-mdc-checkbox .mdc-form-field {
+  font-size: 0.875rem;
+}

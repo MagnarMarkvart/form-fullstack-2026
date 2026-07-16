@@ -1,0 +1,16 @@
+# Root workspace
+node_modules/
+npm-debug.log*
+yarn-error.log*
+*.log
+
+# Local environment
+.env
+.env.local
+.env.*.local
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,71 @@
+@if (user(); as sessionUser) {
+  <article class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-100 bg-slate-900 px-8 py-6 text-white">
+      <p class="text-xs font-medium tracking-widest text-slate-400 uppercase">
+        Your registration
+      </p>
+      <h2 class="mt-2 text-2xl font-semibold tracking-tight">
+        {{ sessionUser.name }}
+      </h2>
+    </div>
+
+    <div class="space-y-8 px-8 py-8">
+      <section>
+        <div class="mb-3 flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-slate-900">Selected sectors</h3>
+          <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+            {{ selectedSectorPaths().length }}
+          </span>
+        </div>
+
+        @if (selectedSectorPaths().length === 0) {
+          <p class="text-sm text-slate-500">No sectors selected.</p>
+        } @else {
+          <ul class="space-y-3">
+            @for (item of selectedSectorPaths(); track item.id) {
+              <li class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                <p class="text-sm font-medium text-slate-900">
+                  {{ item.leafName }}
+                </p>
+                @if (item.pathLabel) {
+                  <p class="mt-1 text-xs leading-relaxed text-slate-500">
+                    {{ item.pathLabel }}
+                  </p>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section class="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
+        <div>
+          <p class="text-sm font-medium text-slate-900">Terms agreement</p>
+          <p class="text-xs text-slate-500">Required to complete registration</p>
+        </div>
+        @if (sessionUser.agreeToTerms) {
+          <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+            Agreed
+          </span>
+        } @else {
+          <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
+            Not agreed
+          </span>
+        }
+      </section>
+    </div>
+  </article>
+} @else {
+  <div class="rounded-xl border border-dashed border-slate-300 bg-white px-8 py-16 text-center">
+    <h2 class="text-lg font-semibold text-slate-900">No saved registration</h2>
+    <p class="mt-2 text-sm text-slate-500">
+      Fill in the form first, then come back to see your structured summary.
+    </p>
+    <a
+      routerLink="/"
+      class="mt-6 inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+    >
+      Go to form
+    </a>
+  </div>
+}

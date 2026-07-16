@@ -1,0 +1,17 @@
+{
+  "name": "angular-prep",
+  "private": true,
+  "description": "Sector registration — Angular frontend + GraphQL Yoga backend",
+  "scripts": {
+    "install:all": "npm install --prefix graphql-yoga-back && npm install --prefix angular-front && npm install",
+    "dev": "concurrently -n back,front -c blue,green \"npm run dev --prefix graphql-yoga-back\" \"npm start --prefix angular-front\"",
+    "start": "npm run dev",
+    "dev:back": "npm run dev --prefix graphql-yoga-back",
+    "dev:front": "npm start --prefix angular-front",
+    "test": "npm test --prefix angular-front -- --watch=false",
+    "dump": "npm run dump --prefix graphql-yoga-back"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

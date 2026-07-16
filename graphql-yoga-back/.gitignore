@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Local SQLite database (schema/data dumps are tracked as .sql)
+app.db
+app.db-journal
+app.db-wal
+app.db-shm
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
