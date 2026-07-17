@@ -1,13 +1,15 @@
 <div class="min-h-screen bg-slate-50">
   <header class="border-b border-slate-200 bg-white">
     <div class="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-4">
-      <span class="text-sm font-semibold tracking-wide text-slate-800 uppercase">
+      <span
+        class="text-xs font-medium tracking-wide text-slate-800 uppercase min-[601px]:text-sm min-[601px]:font-semibold"
+      >
         Helmes Sector Registration
       </span>
 
       <div class="flex items-center gap-3">
         @if (userName()) {
-          <p class="text-sm text-slate-600">
+          <p class="hidden text-sm text-slate-600 min-[601px]:block">
             Welcome,
             <span class="font-medium text-slate-900">{{ userName() }}</span>!
           </p>

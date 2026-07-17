@@ -1,0 +1,10 @@
+/* Keep the sectors select from forcing a wide min-content width on phones. */
+fieldset {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  fieldset {
+    overflow-x: hidden;
+  }
+}
