@@ -239,4 +239,5 @@ If this prototype were developed further, the main next steps would be:
   user ID);
 - replace SQLite with a more production-oriented database where needed;
 - add backend unit tests for `validateSaveUserData`;
+- add unit tests for deleteUserData resolver and delete flow
 - expand frontend coverage (for example form validation edge cases).
