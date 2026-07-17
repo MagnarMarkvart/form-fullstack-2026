@@ -97,10 +97,17 @@ export class FormComponent implements OnInit {
   });
 
   constructor() {
-    // Prefill whenever a session user is available (already loaded, or arrives from API).
+    // Prefill whenever a session user is available; reset when the session is cleared.
     effect(() => {
       const user = this.session.user();
-      if (!user) return;
+      if (!user) {
+        this.registrationModel.set({
+          name: '',
+          selectedSectorIds: [],
+          agreeToTerms: false,
+        });
+        return;
+      }
 
       this.registrationModel.set({
         name: user.name,

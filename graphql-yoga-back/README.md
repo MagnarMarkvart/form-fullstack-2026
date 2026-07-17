@@ -99,6 +99,7 @@ type Query {
 
 type Mutation {
   saveUserData(id: ID, name: String!, selectedSectorIds: [String!]!, agreeToTerms: Boolean!): UserData!
+  deleteUserData(id: ID!): Boolean!
 }
 ```
 
@@ -106,6 +107,8 @@ type Mutation {
 - `sessionUser(id)` — a saved user by id, or `null` (used to restore a session).
 - `saveUserData(...)` — upsert: updates when a known `id` is passed, otherwise
   inserts a new user with a generated UUID.
+- `deleteUserData(id)` — removes the user row (and related `user_sectors` via
+  `ON DELETE CASCADE`); returns `false` if the id was already gone.
 
 ## Request flow
 
@@ -137,6 +140,11 @@ mapped to `UserData`, or `null` if not found.
 Invalid input never reaches the database — it is rejected with a GraphQL error
 (`extensions.code = BAD_USER_INPUT`).
 
+### Delete registration
+
+`Mutation.deleteUserData(id)` deletes the `users` row when it exists. Related
+`user_sectors` rows are removed by the foreign-key cascade defined in `db.ts`.
+
 ## Business logic — what and where
 
 | Rule / behavior | Where |
@@ -144,6 +152,7 @@ Invalid input never reaches the database — it is rejected with a GraphQL error
 | Create/seed tables on startup | `db.ts` |
 | Read sectors / read session user | `resolvers.ts` (`Query`) |
 | Upsert user (update by id or insert new UUID) | `resolvers.ts` (`Mutation.saveUserData`) |
+| Delete user (cascade sector selections) | `resolvers.ts` (`Mutation.deleteUserData`) |
 | Join rows ↔ GraphQL sector IDs and boolean mapping | `resolvers.ts` (`toUserRecord`) |
 | Trimmed non-empty name | `validate-save-user.ts` |
 | Terms must be accepted | `validate-save-user.ts` |

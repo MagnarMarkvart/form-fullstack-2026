@@ -25,5 +25,6 @@ export const typeDefs = /* GraphQL */ `
       selectedSectorIds: [String!]!
       agreeToTerms: Boolean!
     ): UserData!
+    deleteUserData(id: ID!): Boolean!
   }
 `;

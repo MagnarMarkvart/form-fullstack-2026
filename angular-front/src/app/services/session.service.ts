@@ -45,4 +45,11 @@ export class SessionService {
     localStorage.setItem(STORAGE_KEY, user.id);
     this.currentUser.set(user);
   }
+
+  /** Clears the local session after registration data has been wiped. */
+  clearUser() {
+    localStorage.removeItem(STORAGE_KEY);
+    this.currentUser.set(null);
+    this.sessionLoadError.set(null);
+  }
 }

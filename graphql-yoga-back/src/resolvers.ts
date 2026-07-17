@@ -111,5 +111,17 @@ export const resolvers = {
 
       return user;
     },
+    deleteUserData: (_: unknown, { id }: { id: string }) => {
+      const existing = db
+        .prepare('SELECT id FROM users WHERE id = ?')
+        .get(id) as { id: string } | undefined;
+
+      if (!existing) {
+        return false;
+      }
+
+      db.prepare('DELETE FROM users WHERE id = ?').run(id);
+      return true;
+    },
   },
 };

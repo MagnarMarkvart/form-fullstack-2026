@@ -67,4 +67,15 @@ export class GraphqlService {
       })
       .pipe(map((r) => readDataOrThrow(r).saveUserData));
   }
+
+  deleteUserData(id: string): Observable<boolean> {
+    return this.http
+      .post<GqlResponse<{ deleteUserData: boolean }>>(GQL_URL, {
+        query: `mutation DeleteUserData($id: ID!) {
+          deleteUserData(id: $id)
+        }`,
+        variables: { id },
+      })
+      .pipe(map((r) => readDataOrThrow(r).deleteUserData));
+  }
 }

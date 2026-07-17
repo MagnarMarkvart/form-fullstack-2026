@@ -4,6 +4,12 @@ A small full-stack application for entering a name, selecting sectors from a
 hierarchy, accepting the terms, and returning later to view or update the saved
 data.
 
+This solution addresses all four requirements from the technical task:
+(1) replaces the static index.html with an Angular SPA,
+(2) loads sectors from the database,
+(3) validates and persists user data with full CRUD,
+(4) supports session-based editing.
+
 The repository contains:
 
 - `angular-front` — Angular frontend
@@ -19,6 +25,7 @@ The repository contains:
   - [Frontend](#frontend)
   - [Sector tree](#sector-tree)
   - [Profile view](#profile-view)
+  - [Data clearance](#data-clearance)
 - [Tests](#tests)
 - [Production considerations](#production-considerations)
 
@@ -115,9 +122,9 @@ is no real login and the app does not use cookies or a server-managed session.
 After a successful save, the frontend stores the generated user ID in
 `localStorage` and uses it to reload that user's data from the API. That ID can
 be copied or stolen from the browser, so anyone who knows it can load the same
-record. If the ID is cleared from the client, the user loses access to their
-data in this app even though the row may still exist in the database. This is
-only a lightweight persistence demo, not a secure identity mechanism.
+record. This is only a lightweight persistence demo, not a secure identity
+mechanism. The summary view can also permanently delete the registration via
+`deleteUserData` (see [Data clearance](#data-clearance)).
 
 ### Frontend
 
@@ -172,6 +179,20 @@ The profile view presents the saved values in a clearer read-only format. For
 each selected sector, the frontend creates an ID lookup and follows `parentId`
 references from the selected leaf to the root. The collected names are then
 reversed into a complete root-to-leaf path.
+
+### Data clearance
+
+I added a clear-all action on the summary view as a small GDPR-minded
+extension: users should have a clear, simple way to remove their personal data.
+Saving an empty form was not an option — the form validators correctly require
+a name, at least one sector, and accepted terms — so deletion is a dedicated
+API path instead of a “blank save.”
+
+Confirming clearance opens an Angular Material dialog (already used for the
+sector tree), deletes the server record, clears the local session, and returns
+the user to the form. The control and dialog follow the same accessibility
+patterns as the rest of the UI (`aria-label`, `aria-describedby`,
+`aria-haspopup`, and dialog labelling via Material’s config).
 
 ## Tests
 

@@ -43,7 +43,8 @@ src/app/
   components/
     form/                                  # registration page (smart)
     sector-tree/                           # Material tree UI (presentational)
-    profile-view/                          # read-only summary
+    profile-view/                          # summary + clear-all flow
+    confirm-clear-dialog/                  # Material dialog for delete confirm
   services/
     graphql.service.ts                     # GraphQL over HttpClient
     session.service.ts                     # localStorage user id + in-memory user
@@ -115,6 +116,11 @@ the tree.
 resolve each selected id to a full root → leaf path via `getSectorPath()`, then
 renders a readable summary.
 
+Clear-all reuses **Angular Material** (`MatDialog`) already pulled in for the
+sector tree: `ConfirmClearDialogComponent` confirms deletion, then
+`deleteUserData` runs, `SessionService.clearUser()` clears the session, and the
+app returns to the form. An empty summary simply links back to form editing.
+
 ## Business logic — what and where
 
 | Rule / behavior | Where |
@@ -127,8 +133,9 @@ renders a readable summary.
 | Toggle / remove sector ids in the form model | `FormComponent.onSectorToggle` / `removeSelectedSector` |
 | Persist user id after save; restore user on load | `services/session.service.ts` |
 | GraphQL queries/mutations; surface GraphQL `errors` | `services/graphql.service.ts` |
-| Prefill form from session user | `FormComponent` constructor `effect` |
+| Prefill / reset form from session user | `FormComponent` constructor `effect` |
 | Path chips / profile path list presentation | `FormComponent.selectedSectors` / `ProfileViewComponent.selectedSectorPaths` |
+| Confirm and clear all registration data | `profile-view/` + `confirm-clear-dialog/` → `deleteUserData` / `clearUser` |
 
 Server-side validation of the same save rules lives in the backend
 (`validate-save-user.ts`). The frontend still validates for UX; the API rejects
