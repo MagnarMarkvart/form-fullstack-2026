@@ -11,5 +11,6 @@
     "moduleDetection": "force",                                                                                                                               
     "noUncheckedSideEffectImports": true,                                                                                                                     
     "skipLibCheck": true                                                                                                                                      
-  }                                                                                                                                                           
+  },
+  "include": ["src/**/*.ts"]
 }  

@@ -17,7 +17,7 @@ describe('save → session → reload', () => {
   const savedUser: User = {
     id: 'user-1',
     name: 'Ada',
-    selectedSectorIds: ['6'],
+    selectedSectorIds: ['342'],
     agreeToTerms: true,
   };
 
@@ -45,7 +45,7 @@ describe('save → session → reload', () => {
 
   it('saves user data, stores the id, and restores the user after reload', async () => {
     const savePromise = firstValueFrom(
-      graphql.saveUserData('Ada', ['6'], true),
+      graphql.saveUserData('Ada', ['342'], true),
     );
 
     const saveReq = httpMock.expectOne(
@@ -57,7 +57,7 @@ describe('save → session → reload', () => {
     expect(saveReq.request.body.variables).toEqual({
       id: null,
       name: 'Ada',
-      selectedSectorIds: ['6'],
+      selectedSectorIds: ['342'],
       agreeToTerms: true,
     });
     saveReq.flush({ data: { saveUserData: savedUser } });

@@ -9,9 +9,11 @@ export class SessionService {
   private graphql = inject(GraphqlService);
 
   private currentUser = signal<User | null>(null);
+  private sessionLoadError = signal<string | null>(null);
 
   /** Full session user for the structured view. */
   user = this.currentUser.asReadonly();
+  loadError = this.sessionLoadError.asReadonly();
 
   /** Reactive user name for the header; null when no session. */
   userName = computed(() => this.currentUser()?.name ?? null);
@@ -21,6 +23,7 @@ export class SessionService {
     const userId = localStorage.getItem(STORAGE_KEY);
     if (!userId) return;
 
+    this.sessionLoadError.set(null);
     this.graphql.getSessionUser(userId).subscribe({
       next: (user) => {
         if (user) {
@@ -28,6 +31,11 @@ export class SessionService {
         } else {
           localStorage.removeItem(STORAGE_KEY);
         }
+      },
+      error: () => {
+        this.sessionLoadError.set(
+          'Your saved registration could not be loaded. Please try again later.',
+        );
       },
     });
   }

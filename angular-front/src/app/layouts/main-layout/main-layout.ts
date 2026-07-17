@@ -15,6 +15,7 @@ export class MainLayout implements OnInit {
   private router = inject(Router);
 
   userName = this.session.userName;
+  sessionLoadError = this.session.loadError;
 
   private url = toSignal(
     this.router.events.pipe(

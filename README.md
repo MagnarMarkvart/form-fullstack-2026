@@ -8,8 +8,8 @@ The repository contains:
 
 - `angular-front` — Angular frontend
 - `graphql-yoga-back` — GraphQL Yoga API with SQLite persistence
-- `dump.sql` / `schema.sql` — database dump at the repo root (also under
-  `graphql-yoga-back/`)
+- `dump.sql` — a complete, restorable demo database at the repo root (also
+  under `graphql-yoga-back/`); `schema.sql` is the schema-only companion
 
 ## Table of contents
 
@@ -57,7 +57,7 @@ The root commands are:
 - `npm run dev:back` — starts only the backend
 - `npm run dev:front` — starts only the frontend
 - `npm test` — runs Angular tests without the backend
-- `npm run dump` — regenerates `schema.sql` and `dump.sql`
+- `npm run dump` — regenerates the schema and complete deterministic demo dump
 
 Open `http://localhost:4200`. The GraphQL API URL comes from
 `NG_APP_GRAPHQL_URL` in `angular-front/.env` (see `.env.example`).
@@ -81,8 +81,11 @@ npm install
 npm start
 ```
 
-The backend creates and seeds `app.db` when it starts. Refresh the SQL dumps
-with `npm run dump` from the root (or `npm run dump` inside `graphql-yoga-back`).
+The backend creates and seeds `app.db` when it starts. It preserves the supplied
+sector IDs and stores selected sectors in the normalized `user_sectors` join
+table. `dump.sql` contains the schema, all sector data, and two deterministic
+demo registrations (one single-sector, one
+multi-sector); restore it with `sqlite3 app.db < dump.sql`.
 
 ## Technical decisions
 

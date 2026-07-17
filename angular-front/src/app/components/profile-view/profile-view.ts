@@ -24,6 +24,8 @@ export class ProfileViewComponent implements OnInit {
 
   user = this.session.user;
   private sectors = signal<Sector[]>([]);
+  loading = signal(true);
+  error = signal<string | null>(null);
 
   selectedSectorPaths = computed((): SectorPathItem[] => {
     const user = this.user();
@@ -51,7 +53,14 @@ export class ProfileViewComponent implements OnInit {
 
   ngOnInit() {
     this.graphql.getSectors().subscribe({
-      next: (sectors) => this.sectors.set(sectors),
+      next: (sectors) => {
+        this.sectors.set(sectors);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Could not load sector names.');
+        this.loading.set(false);
+      },
     });
   }
 }

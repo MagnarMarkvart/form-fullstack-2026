@@ -46,7 +46,7 @@ Scripts:
 | `npm run dev` | Start with `tsx watch` (reloads on change) |
 | `npm run build` | Compile TypeScript to `dist/` |
 | `npm start` | Run the compiled server |
-| `npm run dump` | Write `schema.sql` / `dump.sql` (backend dir + repo root) |
+| `npm run dump` | Write `schema.sql` and a complete, restorable demo `dump.sql` (backend dir + repo root) |
 
 CORS is restricted to the frontend origin `http://localhost:4200`.
 
@@ -58,7 +58,7 @@ src/
   schema.ts             # GraphQL type definitions (SDL)
   resolvers.ts          # query/mutation resolvers + row mapping
   validate-save-user.ts # server-side domain validation for saveUserData
-  db.ts                 # SQLite connection, table creation, seed-on-empty
+  db.ts                 # SQLite connection, table creation, canonical seed
   data/sectors.ts       # seed sector hierarchy (flat id/name/parentId)
 scripts/
   dump.ts               # export schema + data to .sql
@@ -70,16 +70,19 @@ SQLite tables (created in `db.ts` if missing):
 
 ```
 sectors( id TEXT PK, name TEXT, parentId TEXT NULL )
-users( id TEXT PK, name TEXT, selectedSectorIds TEXT, agreeToTerms INTEGER, createdAt TEXT )
+users( id TEXT PK, name TEXT, agreeToTerms INTEGER, createdAt TEXT )
+user_sectors( userId TEXT FK, sectorId TEXT FK, PK(userId, sectorId) )
 ```
 
 Notes:
 
 - Sectors are stored **flat** (`parentId` references another sector). The tree
   shape is built on the frontend.
-- `users.selectedSectorIds` is stored as a **JSON string**; `agreeToTerms` as
-  `0/1`. `resolvers.ts` maps rows back to typed records
-  (`JSON.parse`, `=== 1`).
+- `user_sectors` is a join table: it enforces one row per selected sector and
+  avoids serializing relational data as JSON. `resolvers.ts` maps its rows back
+  to the GraphQL `selectedSectorIds` array.
+- The sector data keeps the original option values from the supplied select
+  element.
 
 ## GraphQL API
 
@@ -108,9 +111,10 @@ type Mutation {
 
 ### Startup
 
-1. `db.ts` opens `app.db`, creates `sectors` and `users` if they do not exist.
-2. If `sectors` is empty, it seeds the hierarchy from `data/sectors.ts` inside a
-   transaction.
+1. `db.ts` opens `app.db`, creates `sectors`, `users`, and `user_sectors` if
+   they do not exist.
+2. If `sectors` is empty, it seeds the canonical hierarchy from
+   `data/sectors.ts` inside a transaction.
 3. `index.ts` builds the Yoga schema and starts the HTTP server on `:3001`.
 
 ### Load sectors
@@ -140,7 +144,7 @@ Invalid input never reaches the database — it is rejected with a GraphQL error
 | Create/seed tables on startup | `db.ts` |
 | Read sectors / read session user | `resolvers.ts` (`Query`) |
 | Upsert user (update by id or insert new UUID) | `resolvers.ts` (`Mutation.saveUserData`) |
-| Row ↔ typed record mapping (JSON, boolean) | `resolvers.ts` (`toUserRecord`) |
+| Join rows ↔ GraphQL sector IDs and boolean mapping | `resolvers.ts` (`toUserRecord`) |
 | Trimmed non-empty name | `validate-save-user.ts` |
 | Terms must be accepted | `validate-save-user.ts` |
 | At least one sector; de-duplicated | `validate-save-user.ts` |
@@ -175,6 +179,7 @@ UI entirely.
 
 ## Database dump
 
-`npm run dump` reads `app.db` and writes `schema.sql` (table definitions) and
-`dump.sql` (INSERT statements) into both this package and the repo root, so the
-seeded data can be inspected or restored without running the server.
+`npm run dump` writes `schema.sql` and a deterministic, single-file
+`dump.sql` into both this package and the repo root. `dump.sql` contains drop
+statements, schema, all canonical sectors, and two demo users; restore it with
+`sqlite3 app.db < dump.sql`.

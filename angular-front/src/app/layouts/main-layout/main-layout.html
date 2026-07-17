@@ -37,6 +37,11 @@
   </header>
 
   <main class="mx-auto max-w-3xl px-6 py-10">
+    @if (sessionLoadError()) {
+      <p role="alert" class="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        {{ sessionLoadError() }}
+      </p>
+    }
     <router-outlet />
   </main>
 </div>

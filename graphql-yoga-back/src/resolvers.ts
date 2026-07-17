@@ -5,7 +5,6 @@ import { validateSaveUserData } from './validate-save-user.js';
 type UserRow = {
   id: string;
   name: string;
-  selectedSectorIds: string;
   agreeToTerms: number;
   createdAt: string;
 };
@@ -21,20 +20,28 @@ type UserRecord = {
 function toUserRecord(row: UserRow): UserRecord {
   return {
     ...row,
-    selectedSectorIds: JSON.parse(row.selectedSectorIds),
+    selectedSectorIds: (
+      db
+        .prepare(
+          'SELECT sectorId FROM user_sectors WHERE userId = ? ORDER BY sectorId',
+        )
+        .all(row.id) as { sectorId: string }[]
+    ).map((selection) => selection.sectorId),
     agreeToTerms: row.agreeToTerms === 1,
   };
+}
+
+function getUser(id: string): UserRecord | null {
+  const row = db
+    .prepare('SELECT * FROM users WHERE id = ?')
+    .get(id) as UserRow | undefined;
+  return row ? toUserRecord(row) : null;
 }
 
 export const resolvers = {
   Query: {
     sectors: () => db.prepare('SELECT id, name, parentId FROM sectors').all(),
-    sessionUser: (_: unknown, { id }: { id: string }) => {
-      const row = db
-        .prepare('SELECT * FROM users WHERE id = ?')
-        .get(id) as UserRow | undefined;
-      return row ? toUserRecord(row) : null;
-    },
+    sessionUser: (_: unknown, { id }: { id: string }) => getUser(id),
   },
   Mutation: {
     saveUserData: (
@@ -63,20 +70,22 @@ export const resolvers = {
           .get(id) as UserRow | undefined;
 
         if (existing) {
-          db.prepare(
-            `UPDATE users
-             SET name = ?, selectedSectorIds = ?, agreeToTerms = ?
-             WHERE id = ?`,
-          ).run(
-            validated.name,
-            JSON.stringify(validated.selectedSectorIds),
-            1,
-            id,
-          );
+          db.transaction(() => {
+            db.prepare(
+              `UPDATE users
+               SET name = ?, agreeToTerms = ?
+               WHERE id = ?`,
+            ).run(validated.name, 1, id);
+            db.prepare('DELETE FROM user_sectors WHERE userId = ?').run(id);
+            const insertSelection = db.prepare(
+              'INSERT INTO user_sectors (userId, sectorId) VALUES (?, ?)',
+            );
+            for (const sectorId of validated.selectedSectorIds) {
+              insertSelection.run(id, sectorId);
+            }
+          })();
 
-          return toUserRecord(
-            db.prepare('SELECT * FROM users WHERE id = ?').get(id) as UserRow,
-          );
+          return getUser(id)!;
         }
       }
 
@@ -88,15 +97,17 @@ export const resolvers = {
         createdAt: new Date().toISOString(),
       };
 
-      db.prepare(
-        'INSERT INTO users (id, name, selectedSectorIds, agreeToTerms, createdAt) VALUES (?, ?, ?, ?, ?)',
-      ).run(
-        user.id,
-        user.name,
-        JSON.stringify(user.selectedSectorIds),
-        1,
-        user.createdAt,
-      );
+      db.transaction(() => {
+        db.prepare(
+          'INSERT INTO users (id, name, agreeToTerms, createdAt) VALUES (?, ?, ?, ?)',
+        ).run(user.id, user.name, 1, user.createdAt);
+        const insertSelection = db.prepare(
+          'INSERT INTO user_sectors (userId, sectorId) VALUES (?, ?)',
+        );
+        for (const sectorId of user.selectedSectorIds) {
+          insertSelection.run(user.id, sectorId);
+        }
+      })();
 
       return user;
     },

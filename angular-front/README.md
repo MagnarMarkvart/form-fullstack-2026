@@ -163,6 +163,8 @@ invalid or forged input (e.g. Postman, unknown/parent sector ids).
 - Layout and form: mostly **Tailwind** utility classes in templates.
 - Tree: small **component CSS** for Material/MDC internals (indent, checkbox
   font size) via `::ng-deep` in `sector-tree.css`.
+- The form uses explicit labels/fieldset grouping, native required semantics,
+  accessible tree labels, and announced loading, error, and save states.
 
 ## Tests
 
